@@ -9,7 +9,7 @@
 
 int main(){
 
-    int quantidade_numeros;
+    int quantidade_numeros=0;
 
     scanf("%d", &quantidade_numeros);
 
