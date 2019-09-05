@@ -7,6 +7,28 @@
 // TODO
 //  INSERIR OS VALORES ORDENADOS;
 
+int busca_binaria(int array[], int tamanho, int elemento_buscado){
+    int i, inicio, meio, final;
+    inicio =0;
+    final = tamanho-1;
+    while(inicio <= final){
+        meio = (inicio + final)/2;
+        if(elemento_buscado < array[meio]){
+            final = meio - 1;
+        } else {
+            if(elemento_buscado > array[meio]){
+                inicio = meio+1;
+            } else {
+                printf("sim\n");
+                return meio;
+            }
+        }
+    }
+    printf("nao\n");
+    return -1;
+}
+
+
 int divide(int vector[], int esquerda, int direita){
     int cont;
     int auxiliar;
@@ -54,33 +76,11 @@ int main(){
     } 
 
     int numero_teste;
-    int imprime = 0;
 
     quick_sort(array_proibido, 0, quantidade_numeros-1);   
 
     while(scanf("%d", &numero_teste) != EOF){
-        for(int j=0; j<quantidade_numeros; j++){
-            if( numero_teste == array_proibido[j]){
-                printf("sim\n");
-                imprime = 1;
-                break;
-            } 
-
-            else if((array_proibido[j] != array_proibido[j+1]) && array_proibido[j+1] < numero_teste){
-                imprime = 2;
-                break;
-            }
-
-            else{
-                imprime =2;
-            }
-           
-        }
-
-        if(imprime == 2){
-            printf("nao\n");
-        }
-        
+        busca_binaria(array_proibido,quantidade_numeros,numero_teste);
     }
         
     return 0;
