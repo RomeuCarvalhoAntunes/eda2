@@ -155,7 +155,7 @@ int main(){
     merge_sort(votos_dp_estaduais, 0, quantidade_votos_deputados_estaduais-1);
     
 
-    printf("VALIDOS:%d    NULOS:%d\n", votos_validos, votos_brancos_nulos);
+    printf("VALIDOS:%d NULOS:%d\n", votos_validos, votos_brancos_nulos);
 
     printf("%d", quantida_votos_invalidos_presidente);
 
