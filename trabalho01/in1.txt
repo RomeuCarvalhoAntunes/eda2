@@ -1,3 +1,6 @@
-2
-two.diff.erent.providers@now.here
-t.wo.differ.ent.prov.iders@nowhere
+a 0 b
+f e 0
+e d f
+b a c
+c b d
+d c e
