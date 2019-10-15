@@ -86,6 +86,7 @@ int main(){
     int quantidade_nos = 0;
     Node *nodes= NULL;
     Node *more_nodes = NULL;
+    Node *lista_original = NULL;
 
     while(scanf("%x %x %x", &endereco, &anterior, &proximo) != EOF){
         quantidade_nos++;
@@ -100,6 +101,9 @@ int main(){
             free(nodes);
         }
     }
+
+    lista_original = (Node*) malloc(quantidade_nos*sizeof(Node));
+    lista_original = nodes;
 
     // ponteiros para verificar o caminho
     ponteiro_1 = nodes[0];
@@ -117,58 +121,52 @@ int main(){
     int tamanho_caminho =0;
 
     if(ponteiro_1_aux.endereco_no == ponteiro_2_aux.endereco_no){
-        printf("sana\n");
         return 0;
     }
     
-    while(ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no){
-        caminho[i] = ponteiro_1_aux.endereco_no;
-        index = busca_binaria(nodes,quantidade_nos, ponteiro_1_aux.endereco_prox);
-        i++;
-        ponteiro_1_aux = nodes[index];
-        if(ponteiro_1_aux.endereco_prox == 0 && (ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no)){
-            printf("insana\n");
-            return 0;
-        }
-        tamanho_caminho++;
-    }
-
-
-    unsigned int caminho_inverso[quantidade_nos];
-    ponteiro_1_aux = ponteiro_2;
-    ponteiro_2_aux = ponteiro_1;
-
-    int i_inverso = 0;
-    int index_inverso=0;
-    int tamanho_caminho_inverso = 0;
-
-    while(ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no){
-        caminho_inverso[i_inverso] = ponteiro_1_aux.endereco_no;
-        index_inverso = busca_binaria(nodes,quantidade_nos, ponteiro_1_aux.endereco_anterior);
-        i_inverso++;
-        ponteiro_1_aux = nodes[index_inverso];
-        if(ponteiro_1_aux.endereco_anterior == 0 && (ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no)){
-            printf("insana\n");
-            return 0;
-        }
-        tamanho_caminho_inverso++;
-    }
-
-    if(tamanho_caminho != tamanho_caminho_inverso){
-        printf("insana\n");
-    } else {
-        for(int i=1; i<tamanho_caminho; i++){
-            if(caminho[i] != caminho_inverso[tamanho_caminho_inverso-1]){
-                printf("insana\n");
+    do
+    {
+        if(i == 0){
+            caminho[i] = ponteiro_1_aux.endereco_no;
+            index = busca_binaria(nodes,quantidade_nos, ponteiro_1_aux.endereco_prox);
+            i++;
+            ponteiro_1_aux = nodes[index];
+            if(ponteiro_1_aux.endereco_prox == 0 && (ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no)){
                 return 0;
             }
-            tamanho_caminho_inverso--;
-            if(tamanho_caminho_inverso == 0){
-                printf("insana\n");
+            tamanho_caminho++;
+        } else {
+            ponteiro_1_aux = nodes[index];
+            caminho[i] = ponteiro_1_aux.endereco_no;
+            index = busca_binaria(nodes,quantidade_nos, ponteiro_1_aux.endereco_prox);
+            i++;
+            if(ponteiro_1_aux.endereco_prox == 0 && (ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no)){
                 return 0;
             }
+            tamanho_caminho++;
         }
-        printf("sana\n");
+    } while (ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no);
+    
+
+    for(int i=0; i<tamanho_caminho; i++){
+        for(int j=0; j<quantidade_nos; j++){
+            if(caminho[i] == lista_original[j].endereco_no){
+                lista_original[j].endereco_no = 0;
+            }
+        }
     }
+
+    for(int j=0; j<quantidade_nos; j++){
+        if(lista_original[j].endereco_no != 0){
+            printf("%x %x %x", lista_original[j].endereco_no, lista_original[j].endereco_anterior,lista_original[j].endereco_prox);
+            printf("\n");
+        }
+    }
+
+    printf("\n");   
+    for(int i=0; i<tamanho_caminho; i++){
+        printf("%x\n", caminho[i]);
+    }
+
     return 0;
 }
