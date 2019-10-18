@@ -4,16 +4,17 @@
 #include <string.h>
 
 typedef struct Node {
-    unsigned int endereco_no;
-    unsigned int endereco_anterior;
-    unsigned int endereco_prox;
+    unsigned long endereco_no;
+    unsigned long endereco_anterior;
+    unsigned long endereco_prox;
+    long visitado;
 } Node;
 
 // create merge sort here
-void merge(Node* vector, int inicio, int meio, int fim){
+void merge(Node* vector, long inicio, long meio, long fim){
     Node *vector_temp;
-    int pivo_1, pivo_2, tamanho;
-    int fim1 = 0, fim2 = 0;
+    long pivo_1, pivo_2, tamanho;
+    long fim1 = 0, fim2 = 0;
 
     tamanho = fim-inicio+1;
     
@@ -23,7 +24,7 @@ void merge(Node* vector, int inicio, int meio, int fim){
     vector_temp = (Node *) malloc (tamanho*sizeof(Node));
 
     if(vector_temp != NULL){
-        for(int i=0; i<tamanho; i++){
+        for(long i=0; i<tamanho; i++){
             if(!fim1 && !fim2){
                 if(vector[pivo_1].endereco_no < vector[pivo_2].endereco_no){
                     vector_temp[i] = vector[pivo_1++];
@@ -41,14 +42,14 @@ void merge(Node* vector, int inicio, int meio, int fim){
             }
         }
 
-        for(int j=0, k=inicio; j<tamanho; j++, k++){
+        for(long j=0, k=inicio; j<tamanho; j++, k++){
             vector[k] = vector_temp[j];
         }
     }
     free(vector_temp);
 }
-void merge_sort(Node* vector, int inicio, int fim){
-    int meio;
+void merge_sort(Node* vector, long inicio, long fim){
+    long meio;
     if(inicio < fim){
         meio = floor((inicio+fim)/2);
         merge_sort(vector, inicio, meio);
@@ -58,9 +59,9 @@ void merge_sort(Node* vector, int inicio, int fim){
 }
 
 // BUSCA BINARIA
-int busca_binaria(Node* array, int tamanho, int elemento_buscado){
-    int i, inicio, meio, final;
-    inicio =0;
+long busca_binaria(Node* array, long tamanho, long elemento_buscado){
+    long i, inicio, meio, final;
+    inicio = 0;
     final = tamanho-1;
     while(inicio <= final){
         meio = (inicio + final)/2;
@@ -79,15 +80,15 @@ int busca_binaria(Node* array, int tamanho, int elemento_buscado){
 
 int main(){
 
-    unsigned int endereco;
-    unsigned int anterior;
-    unsigned int proximo; 
-    Node ponteiro_1, ponteiro_2;
-    int quantidade_nos = 0;
+    unsigned long endereco;
+    unsigned long anterior;
+    unsigned long proximo; 
+    long quantidade_nos = 0;
     Node *nodes= NULL;
     Node *more_nodes = NULL;
 
-    while(scanf("%x %x %x", &endereco, &anterior, &proximo) != EOF){
+    // le todos os ponteiros de entrada e coloca visitado como 0;
+    while(scanf("%lx %lx %lx", &endereco, &anterior, &proximo) != EOF){
         quantidade_nos++;
         more_nodes = (Node*) realloc (nodes, quantidade_nos * sizeof(Node));
         
@@ -96,79 +97,99 @@ int main(){
             nodes[quantidade_nos - 1].endereco_no = endereco; 
             nodes[quantidade_nos - 1].endereco_anterior = anterior; 
             nodes[quantidade_nos - 1].endereco_prox = proximo; 
+            nodes[quantidade_nos - 1].visitado = 0;
         } else {
             free(nodes);
         }
     }
 
-    // ponteiros para verificar o caminho
-    ponteiro_1 = nodes[0];
-    ponteiro_2 = nodes[1];
+    // seta ptr1 e ptr2;
+    Node no_ptr1 = nodes[0];
+    Node no_ptr2 = nodes[1];
+    Node aux_ptr1 = no_ptr1;
+    Node aux_ptr2 = no_ptr2;
 
-    unsigned int caminho[quantidade_nos];
-    Node ponteiro_1_aux, ponteiro_2_aux;
-    ponteiro_1_aux = ponteiro_1;
-    ponteiro_2_aux = ponteiro_2;
-
+    // Ordena a entrada com base no endereco do ponteiro.
     merge_sort(nodes,0,quantidade_nos-1);
 
-    int i=0;
-    int index=0;
-    int tamanho_caminho =0;
+    // variaveis auxiliares para criacao do caminho de ida
+    long caminho_ida[quantidade_nos];
+    long tamanho_caminho_ida = 0;
+    long index_ida_prox = 0;
+    long index_ida_visitado = 0;
 
-    if(ponteiro_1_aux.endereco_no == ponteiro_2_aux.endereco_no){
+    // constroi caminho de ida
+    while(no_ptr1.endereco_no != no_ptr2.endereco_no){
+        caminho_ida[tamanho_caminho_ida] = no_ptr1.endereco_no;
+        tamanho_caminho_ida++;
+
+        // busca para marcar que visitei o no
+        index_ida_visitado = busca_binaria(nodes, quantidade_nos, no_ptr1.endereco_no);
+        nodes[index_ida_visitado].visitado = 1;
+
+        // busca para verificar se o no prox existe
+        index_ida_prox = busca_binaria(nodes,quantidade_nos,no_ptr1.endereco_prox);
+        if(index_ida_prox == -1){
+            // PROXIMO NAO EXISTE
+            printf("insana\n");
+            return 0;
+        } else {
+            no_ptr1 = nodes[index_ida_prox];
+            if(no_ptr1.visitado == 1){
+                // LOOP
+                printf("insana\n");
+                return 0;
+            }
+        }
+        
+    }
+
+    // set ponteiros para volta
+    no_ptr1 = aux_ptr1;
+    no_ptr2 = aux_ptr2;
+
+    // variaveis auxiliares para caminho volta
+    long caminho_volta[quantidade_nos];
+    long tamanho_caminho_volta =0;
+    long index_busca_volta = 0;
+    long index_volta_visitado = 0;
+
+    while(no_ptr1.endereco_no != no_ptr2.endereco_no){
+        caminho_volta[tamanho_caminho_volta] = no_ptr2.endereco_no;
+        tamanho_caminho_volta++;
+
+        // busca para marcar a visita do no da volta
+        index_volta_visitado = busca_binaria(nodes,quantidade_nos, no_ptr2.endereco_no);
+        nodes[index_volta_visitado].visitado = 2;
+
+        // busca para verificar o anterior
+        index_busca_volta = busca_binaria(nodes,quantidade_nos,no_ptr2.endereco_anterior);
+        if(index_busca_volta == -1){
+            // anterior NAO EXISTE
+            printf("insana\n");
+            return 0;
+        } else {
+            no_ptr2 = nodes[index_busca_volta];
+            if(no_ptr2.visitado == 2){
+                // LOOP
+                printf("insana\n");
+                return 0;
+            }
+        }
+    }
+
+    if(tamanho_caminho_ida == tamanho_caminho_volta){
+        for(int i =1; i<tamanho_caminho_ida; i++){
+            if(caminho_ida[i] != caminho_volta[tamanho_caminho_volta-1]){
+                printf("insana\n");
+                return 0;
+            } 
+            tamanho_caminho_volta--;
+        }
         printf("sana\n");
-        return 0;
-    }
-    
-    while(ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no){
-        caminho[i] = ponteiro_1_aux.endereco_no;
-        index = busca_binaria(nodes,quantidade_nos, ponteiro_1_aux.endereco_prox);
-        i++;
-        ponteiro_1_aux = nodes[index];
-        if(ponteiro_1_aux.endereco_prox == 0 && (ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no)){
-            printf("insana\n");
-            return 0;
-        }
-        tamanho_caminho++;
-    }
-
-
-    unsigned int caminho_inverso[quantidade_nos];
-    ponteiro_1_aux = ponteiro_2;
-    ponteiro_2_aux = ponteiro_1;
-
-    int i_inverso = 0;
-    int index_inverso=0;
-    int tamanho_caminho_inverso = 0;
-
-    while(ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no){
-        caminho_inverso[i_inverso] = ponteiro_1_aux.endereco_no;
-        index_inverso = busca_binaria(nodes,quantidade_nos, ponteiro_1_aux.endereco_anterior);
-        i_inverso++;
-        ponteiro_1_aux = nodes[index_inverso];
-        if(ponteiro_1_aux.endereco_anterior == 0 && (ponteiro_1_aux.endereco_no != ponteiro_2_aux.endereco_no)){
-            printf("insana\n");
-            return 0;
-        }
-        tamanho_caminho_inverso++;
-    }
-
-    if(tamanho_caminho != tamanho_caminho_inverso){
-        printf("insana\n");
     } else {
-        for(int i=1; i<tamanho_caminho; i++){
-            if(caminho[i] != caminho_inverso[tamanho_caminho_inverso-1]){
-                printf("insana\n");
-                return 0;
-            }
-            tamanho_caminho_inverso--;
-            if(tamanho_caminho_inverso == 0){
-                printf("insana\n");
-                return 0;
-            }
-        }
-        printf("sana\n");
+        printf("insana\n");
     }
+
     return 0;
 }

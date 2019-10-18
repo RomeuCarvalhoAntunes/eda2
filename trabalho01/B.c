@@ -3,11 +3,14 @@
 #include <stdio.h>
 #include <string.h>
 
+// UTILIZAR UNSIGNED LONG LE COMO LX
+// 
+
 typedef struct Node {
-    unsigned int endereco_no;
-    unsigned int endereco_anterior;
-    unsigned int endereco_prox;
-    int imprime;
+    unsigned long endereco_no;
+    unsigned long endereco_anterior;
+    unsigned long endereco_prox;
+    long imprime;
 } Node;
 
 // create merge sort here
@@ -80,16 +83,16 @@ int busca_binaria(Node* array, int tamanho, int elemento_buscado){
 
 int main(){
 
-    unsigned int endereco;
-    unsigned int anterior;
-    unsigned int proximo; 
+    unsigned long endereco;
+    unsigned long anterior;
+    unsigned long proximo; 
     Node ponteiro_1, ponteiro_2;
-    int quantidade_nos = 0;
+    long quantidade_nos = 0;
     Node *nodes= NULL;
     Node *more_nodes = NULL;
     Node *lista_original = NULL;
 
-    while(scanf("%x %x %x", &endereco, &anterior, &proximo) != EOF){
+    while(scanf("%lx %lx %lx", &endereco, &anterior, &proximo) != EOF){
         quantidade_nos++;
         more_nodes = (Node*) realloc (nodes, quantidade_nos * sizeof(Node));
         
