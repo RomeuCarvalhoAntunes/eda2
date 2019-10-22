@@ -4,15 +4,73 @@
 #include <string.h>
 
 typedef struct Semente {
-    long codigo_semente;
-    long nota_qualidade;
+    int codigo_semente;
+    int nota_qualidade;
 } Semente;
 
 
-void merge(Semente* vector, long inicio, long meio, long fim){
+int particiona(Semente *array, int incio, int fim){
+    int dir = fim;
+    int esq = incio;
+    Semente pivo = array[dir], aux;
+    for(int i = incio; i < dir; i++){
+
+        if(array[i].nota_qualidade <= pivo.nota_qualidade){
+            
+            if(array[i].nota_qualidade == pivo.nota_qualidade){
+               
+                if(array[i].codigo_semente < pivo.codigo_semente){
+                    aux = array[i];
+                    array[i] = array[esq];
+                    array[esq] = aux;
+                    esq++;
+                }
+
+            } else {
+                aux = array[i];
+                array[i] = array[esq];
+                array[esq] = aux;
+                esq++;
+            }
+        } 
+    }
+
+    aux = array[fim];
+    array[fim] = array[esq];
+    array[esq] = aux;
+
+    return esq;
+}
+
+// funcao para calcular a mediana do quicksort e aumentar a velocidade
+int mediana(Semente *array, int inicio, int fim){
+    Semente aux;
+    aux = array[(inicio+fim)/2];
+    array[(inicio+fim)/2] = array[fim];
+    array[fim]=aux;
+    return particiona(array,inicio,fim);  
+}
+
+// quick sort que o professor utiliza chama-se ENCONTRA E COLOCA
+void quick_sort(Semente *array, int inicio, int fim, int index){
+    int pivo = mediana(array, inicio,fim);
+    if(pivo == index){
+        return;
+    }
+    if( pivo < index){
+        // Menor que o index
+        quick_sort(array,pivo+1, fim, index);
+    } else {
+        // Maior que o index
+        quick_sort(array,inicio, pivo-1, index);
+    }
+}
+
+
+void junta_pelo_id(Semente* vector, int inicio, int meio, int fim){
     Semente *vector_temp;
-    long pivo_1, pivo_2, tamanho;
-    long fim1 = 0, fim2 = 0;
+    int pivo_1, pivo_2, tamanho;
+    int fim1 = 0, fim2 = 0;
 
     tamanho = fim-inicio+1;
     
@@ -22,12 +80,12 @@ void merge(Semente* vector, long inicio, long meio, long fim){
     vector_temp = (Semente *) malloc (tamanho*sizeof(Semente));
 
     if(vector_temp != NULL){
-        for(long i=0; i<tamanho; i++){
+        for(int i=0; i<tamanho; i++){
             if(!fim1 && !fim2){
-                if(vector[pivo_1].nota_qualidade < vector[pivo_2].nota_qualidade){
+                if(vector[pivo_1].codigo_semente < vector[pivo_2].codigo_semente){
                     vector_temp[i] = vector[pivo_1++];
                 } else {
-                    vector_temp[i] = vector[pivo_2++];
+                        vector_temp[i] = vector[pivo_2++];
                 }
                 if(pivo_1>meio) fim1 = 1;
                 if(pivo_2>fim) fim2 = 1;
@@ -40,59 +98,39 @@ void merge(Semente* vector, long inicio, long meio, long fim){
             }
         }
 
-        for(long j=0, k=inicio; j<tamanho; j++, k++){
+        for(int j=0, k=inicio; j<tamanho; j++, k++){
             vector[k] = vector_temp[j];
         }
     }
     free(vector_temp);
 }
 
-void merge_sort(Semente* vector, long inicio, long fim){
-    long meio;
+void ordena_pelo_id(Semente* vector, int inicio, int fim){
+    int meio;
     if(inicio < fim){
         meio = floor((inicio+fim)/2);
-        merge_sort(vector, inicio, meio);
-        merge_sort(vector, meio+1, fim);
-        merge(vector, inicio, meio, fim);
+        ordena_pelo_id(vector, inicio, meio);
+        ordena_pelo_id(vector, meio+1, fim);
+        junta_pelo_id(vector, inicio, meio, fim);
     }
 }
 
 
-
-// BUSCA BINARIA
-long busca_binaria(Semente* array, long tamanho, long elemento_buscado){
-    long i, inicio, meio, final;
-    inicio = 0;
-    final = tamanho-1;
-    while(inicio <= final){
-        meio = (inicio + final)/2;
-        if(elemento_buscado < array[meio].nota_qualidade){
-            final = meio - 1;
-        } else {
-            if(elemento_buscado > array[meio].nota_qualidade){
-                inicio = meio+1;
-            } else {
-                return meio;
-            }
-        }
-    }
-    return -1;
-}
 
 int main(){
 
-    long codigo_semente;
-    long melhores_sementes;
-    long nota_semente; 
-    long quantidade_sementes = 0;
+    int codigo_semente;
+    int melhores_sementes;
+    int nota_semente; 
+    int quantidade_sementes = 0;
     Semente *sementes= NULL;
     Semente *mais_sementes = NULL;
 
     // quantidade de sementes que serao selecionadas
-    scanf("%lld", &melhores_sementes);
+    scanf("%d", &melhores_sementes);
 
     // le todos os ponteiros de entrada e coloca visitado como 0;
-    while(scanf("%lld %lld", &codigo_semente, &nota_semente) != EOF){
+    while(scanf("%d %d", &codigo_semente, &nota_semente) != EOF){
         quantidade_sementes++;
         mais_sementes = (Semente*) realloc (sementes, quantidade_sementes * sizeof(Semente));
         
@@ -105,15 +143,25 @@ int main(){
         }
     }
 
-    // ordenar as sementes conforme a nota da semente, da menor para maior
-    merge_sort(sementes,0, quantidade_sementes-1);
+    if(quantidade_sementes <= melhores_sementes){
+        quick_sort(sementes,0,quantidade_sementes-1, quantidade_sementes-1);
+        ordena_pelo_id(sementes,0,quantidade_sementes-1);
+        for(int i=0; i<quantidade_sementes; i++){
+            printf("%d %d\n", sementes[i].codigo_semente, sementes[i].nota_qualidade);
+        }
+    } else {
+        quick_sort(sementes,0,quantidade_sementes-1, melhores_sementes-1);
+        ordena_pelo_id(sementes,0,melhores_sementes-1);
+        for(int i=0; i<melhores_sementes; i++){
+            printf("%d %d\n", sementes[i].codigo_semente, sementes[i].nota_qualidade);
+        }
 
-    for(long i=0; i<quantidade_sementes; i++){
-        printf("%lld %lld\n", sementes[i].codigo_semente, sementes[i].nota_qualidade);
     }
-
-
 
 
     return 0;
 }
+
+
+
+
