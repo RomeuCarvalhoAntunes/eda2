@@ -1,0 +1,8 @@
+5 2
+caterpillar
+bird
+horse
+elefant
+herb
+herb caterpillar
+caterpillar bird
